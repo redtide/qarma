@@ -312,7 +312,7 @@ Qarma::Qarma(int &argc, char **argv) : QApplication(argc, argv)
     }
 }
 
-bool Qarma::error(const QString message)
+bool Qarma::error(const QString& message)
 {
     printf("Error: %s", qPrintable(message));
     QMetaObject::invokeMethod(this, "quitOnError", Qt::QueuedConnection);
@@ -811,7 +811,7 @@ char Qarma::showList(const QStringList &args)
     return 0;
 }
 
-void Qarma::notify(const QString message, bool noClose)
+void Qarma::notify(const QString& message, bool noClose)
 {
 #ifndef QARMA_DBUS
     (void)message; (void)noClose;
