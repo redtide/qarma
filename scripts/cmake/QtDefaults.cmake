@@ -36,7 +36,6 @@ list(APPEND ${PRJ_PREFIX}_QT_COMPONENTS Widgets)
 list(APPEND ${PRJ_PREFIX}_QT_LIBRARIES Qt${QT_MAJOR_VERSION}::Widgets)
 
 if(${PRJ_PREFIX}_NEED_QT_DBUS AND DBUS_FOUND AND NOT WIN32)
-    message(STATUS "Qt: Using DBus")
     list(APPEND ${PRJ_PREFIX}_QT_COMPONENTS DBus)
 endif()
 
@@ -54,6 +53,8 @@ find_package(Qt${QT_MAJOR_VERSION} ${QT_MIN_VERSION} REQUIRED COMPONENTS
 
 if(${PRJ_PREFIX}_NEED_QT_DBUS AND Qt${QT_MAJOR_VERSION}DBus_FOUND)
     list(APPEND ${PRJ_PREFIX}_QT_LIBRARIES Qt${QT_MAJOR_VERSION}::DBus)
+    set(${PRJ_PREFIX}_DBUS ON)
+    message(STATUS "Qt: Using DBus")
 endif()
 
 if(${PRJ_PREFIX}_NEED_QT_EXTRA)
@@ -80,6 +81,9 @@ endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${${PRJ_PREFIX}_QT_LIBRARIES})
 
+if(${PRJ_PREFIX}_DBUS)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC ${PRJ_PREFIX}_DBUS)
+endif()
 if (${PRJ_PREFIX}_X11EXTRA)
     target_compile_definitions(${PROJECT_NAME} PUBLIC ${PRJ_PREFIX}_X11EXTRA)
 elseif(${PRJ_PREFIX}_WINEXTRA)
