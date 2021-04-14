@@ -62,14 +62,6 @@
 
 #include <QtDebug>
 
-#ifdef QARMA_X11EXTRA
-    #include <QX11Info>
-    #include <X11/Xlib-xcb.h>
-    // Undef unused clashing defines between X11 and QEvent
-    #undef FocusIn
-    #undef FocusOut
-#endif
-
 #ifdef Q_OS_UNIX
 #include <signal.h>
 #include <unistd.h>
@@ -77,7 +69,7 @@
 
 static QScreen *findScreenAt(const QPoint &pos)
 {
-    for (QScreen *screen : QGuiApplication::screens())
+    foreach (QScreen *screen, QGuiApplication::screens())
     {
         if (screen->geometry().contains(pos))
             return screen;
@@ -163,9 +155,9 @@ private:
 
 InputGuard *InputGuard::s_instance = NULL;
 
-#ifdef WS_X11
-#include <QX11Info>
-#include <X11/Xlib.h>
+#ifdef QARMA_X11EXTRA
+    #include <QX11Info>
+    #include <X11/Xlib.h>
 #endif
 
 typedef QPair<QString, QString> Help;
