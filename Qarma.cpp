@@ -41,6 +41,7 @@
 #include <QProgressDialog>
 #include <QPropertyAnimation>
 #include <QPushButton>
+#include <QScreen>
 #include <QScrollBar>
 #include <QSettings>
 #include <QSlider>
@@ -48,6 +49,7 @@
 #include <QStringBuilder>
 #include <QStringList>
 #include <QTextEdit>
+#include <QTextStream>
 #include <QTimer>
 #include <QTimerEvent>
 #include <QTreeWidget>
@@ -60,10 +62,28 @@
 
 #include <QtDebug>
 
+#ifdef QARMA_X11EXTRA
+    #include <QX11Info>
+    #include <X11/Xlib-xcb.h>
+    // Undef unused clashing defines between X11 and QEvent
+    #undef FocusIn
+    #undef FocusOut
+#endif
+
 #ifdef Q_OS_UNIX
 #include <signal.h>
 #include <unistd.h>
 #endif
+
+static QScreen *findScreenAt(const QPoint &pos)
+{
+    for (QScreen *screen : QGuiApplication::screens())
+    {
+        if (screen->geometry().contains(pos))
+            return screen;
+    }
+    return nullptr;
+}
 
 class InputGuard : public QObject
 {
@@ -290,7 +310,7 @@ Qarma::Qarma(int &argc, char **argv) : QApplication(argc, argv)
                 btn->setText(m_cancel);
         }
         if (m_parentWindow) {
-#ifdef WS_X11
+#ifdef QARMA_X11EXTRA
             m_dialog->setAttribute(Qt::WA_X11BypassTransientForHint);
             XSetTransientForHint(QX11Info::display(), m_dialog->winId(), m_parentWindow);
 #endif
@@ -827,7 +847,13 @@ void Qarma::notify(const QString message, bool noClose)
     dlg->setText(labelText(message));
     SHOW_DIALOG
     dlg->adjustSize();
-    dlg->move(QApplication::desktop()->availableGeometry().topRight() - QPoint(dlg->width() + 20, -20));
+
+    QPoint   pos    = QCursor::pos();
+    QScreen *screen = findScreenAt(pos);
+    if (!screen)
+        return;
+
+    dlg->move(screen->availableGeometry().topRight() - QPoint(dlg->width() + 20, -20));
 }
 
 char Qarma::showNotification(const QStringList &args)
