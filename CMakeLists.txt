@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(qarma LANGUAGES CXX)
+project(Qarma LANGUAGES CXX)
 set(${PROJECT_NAME}_DESCRIPTION "Zenity Clone for Qt")
 set(${PROJECT_NAME}_HOMEPAGE_URL "https://github.com/luebking/qarma")
 
+string(TOLOWER ${PROJECT_NAME} PROJECT_TARGET_NAME)
 string(TOUPPER ${PROJECT_NAME} PRJ_PREFIX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -20,10 +21,12 @@ if(UNIX AND NOT APPLE)
 endif()
 
 set(${PRJ_PREFIX}_SOURCES
-    Qarma.cpp
-    Qarma.h
+    src/Qarma.cpp
+    src/Qarma.h
 )
 include(QtDefaults)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_TARGET_NAME}")
 
 if(UNIX AND NOT APPLE)
     target_link_libraries(${PROJECT_NAME} PRIVATE X11)
