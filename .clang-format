@@ -1,0 +1,6 @@
+---
+BasedOnStyle: WebKit
+SortIncludes: false
+ColumnLimit: '80'
+
+...
