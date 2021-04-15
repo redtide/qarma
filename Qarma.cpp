@@ -668,26 +668,43 @@ char Qarma::showFileSelection(const QStringList &args)
         dlg->setSidebarUrls(bookmarks);
     QStringList mimeFilters;
     for (int i = 0; i < args.count(); ++i) {
-        if (args.at(i) == "--filename")
+        if (args.at(i) == "--filename") {
             dlg->selectFile(NEXT_ARG);
-        else if (args.at(i) == "--multiple")
+        }
+        else if (args.at(i) == "--multiple") {
             dlg->setFileMode(QFileDialog::ExistingFiles);
+        }
         else if (args.at(i) == "--directory") {
             dlg->setFileMode(QFileDialog::Directory);
             dlg->setOption(QFileDialog::ShowDirsOnly);
-        } else if (args.at(i) == "--save") {
+        }
+        else if (args.at(i) == "--save") {
             dlg->setFileMode(QFileDialog::AnyFile);
             dlg->setAcceptMode(QFileDialog::AcceptSave);
         }
-        else if (args.at(i) == "--separator")
+        else if (args.at(i) == "--separator") {
             dlg->setProperty("qarma_separator", NEXT_ARG);
-        else if (args.at(i) == "--confirm-overwrite")
+        }
+        else if (args.at(i) == "--confirm-overwrite") {
             dlg->setOption(QFileDialog::DontConfirmOverwrite);
-        else if (args.at(i) == "--file-filter")
-            mimeFilters << NEXT_ARG.split(" ");
-        else if (args.at(i) == "--initial")
+        }
+        else if (args.at(i) == "--file-filter") {
+            QStringList filters = NEXT_ARG.split('|');
+            QString filter;
+            if (filters.size() == 2) {
+                filter = filters.at(0).trimmed() + " (" + filters.at(1).trimmed() + ')';
+                mimeFilters << filter;
+            }
+            else {
+                mimeFilters << filters;
+            }
+        }
+        else if (args.at(i) == "--initial") {
             dlg->setDirectory(NEXT_ARG);
-        else { WARN_UNKNOWN_ARG("--file-selection") }
+        }
+        else {
+            WARN_UNKNOWN_ARG("--file-selection");
+        }
     }
     dlg->setNameFilters(mimeFilters);
     SHOW_DIALOG
