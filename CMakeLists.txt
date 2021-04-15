@@ -16,7 +16,7 @@ set(${PRJ_PREFIX}_NEED_QT_EXTRA ON)
 if(UNIX AND NOT APPLE)
     include(FindPkgConfig)
     find_package(X11)
-    pkg_check_modules(DBUS REQUIRED)
+    pkg_check_modules(DBUS REQUIRED dbus-1)
 endif()
 
 set(${PRJ_PREFIX}_SOURCES
