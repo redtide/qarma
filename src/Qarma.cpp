@@ -50,7 +50,7 @@
 #include <QSocketNotifier>
 #include <QStringBuilder>
 #include <QStringList>
-#include <QTextEdit>
+#include <QTextBrowser>
 #include <QTextStream>
 #include <QTimer>
 #include <QTimerEvent>
@@ -1077,7 +1077,7 @@ void Qarma::readStdIn()
                 const int oldValue = te->verticalScrollBar()
                     ? te->verticalScrollBar()->value()
                     : 0;
-                te->setText(te->toPlainText() + cachedText);
+                te->setPlainText(te->toPlainText() + cachedText);
                 cachedText.clear();
                 if (te->verticalScrollBar()
                     && te->property("qarma_autoscroll").toBool()) {
@@ -1253,20 +1253,18 @@ char Qarma::showText(const QStringList& args)
 {
     NEW_DIALOG
 
-    QTextEdit* te;
-    vl->addWidget(te = new QTextEdit(dlg));
+    QTextBrowser* te;
+    vl->addWidget(te = new QTextBrowser(dlg));
     te->setReadOnly(true);
+    te->setOpenExternalLinks(true);
     QCheckBox* cb(nullptr);
 
-    bool needStdIn(true);
+    QString filename;
+    bool html(false), plain(false), onlyMarkup(false);
+
     for (int i = 0; i < args.count(); ++i) {
         if (args.at(i) == "--filename") {
-            needStdIn = false;
-            QFile file(NEXT_ARG);
-            if (file.open(QIODevice::ReadOnly)) {
-                te->setText(QString::fromLocal8Bit(file.readAll()));
-                file.close();
-            }
+            filename = NEXT_ARG;
         } else if (args.at(i) == "--editable")
             te->setReadOnly(false);
         else if (args.at(i) == "--font") {
@@ -1275,11 +1273,23 @@ char Qarma::showText(const QStringList& args)
             vl->addWidget(cb = new QCheckBox(NEXT_ARG, dlg));
         } else if (args.at(i) == "--auto-scroll") {
             te->setProperty("qarma_autoscroll", true);
+        } else if (args.at(i) == "--html") {
+            html = true;
+            te->setProperty("qarma_html", true);
+        } else if (args.at(i) == "--plain") {
+            plain = true;
+        } else if (args.at(i) == "--no-interaction") {
+            onlyMarkup = true;
         } else {
             WARN_UNKNOWN_ARG("--text-info");
         }
     }
 
+    if (html) {
+        te->setReadOnly(true);
+        te->setTextInteractionFlags(onlyMarkup ? Qt::TextSelectableByMouse
+                                               : Qt::TextBrowserInteraction);
+    }
     if (te->isReadOnly()) {
         QPalette pal = te->viewport()->palette();
         for (int i = 0; i < 4; ++i) { // Disabled, Active, Inactive, Normal
@@ -1292,10 +1302,20 @@ char Qarma::showText(const QStringList& args)
         te->viewport()->setAutoFillBackground(false);
         te->setFrameStyle(QFrame::NoFrame);
     }
-
-    if (needStdIn)
+    if (filename.isNull()) {
         listenToStdIn();
-
+    } else {
+        QFile file(filename);
+        if (file.open(QIODevice::ReadOnly)) {
+            if (html)
+                te->setHtml(QString::fromLocal8Bit(file.readAll()));
+            else if (plain)
+                te->setPlainText(QString::fromLocal8Bit(file.readAll()));
+            else
+                te->setText(QString::fromLocal8Bit(file.readAll()));
+            file.close();
+        }
+    }
     FINISH_DIALOG(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     if (cb) {
@@ -1627,14 +1647,25 @@ void Qarma::printHelp(const QString& category)
                        << Help("--print-partial", tr("Print partial values"))
                        << Help("--hide-value", tr("Hide value")));
         helpDict["text-info"] = CategoryHelp(tr("Text information options"),
-            HelpList() << Help("--filename=FILENAME", tr("Open file"))
-                       << Help("--editable", tr("Allow changes to text"))
-                       << Help("--font=TEXT", tr("Set the text font"))
-                       << Help("--checkbox=TEXT",
-                              tr("Enable an I read and agree checkbox"))
-                       << Help("--auto-scroll",
-                              tr("Auto scroll the text to the end. Only when "
-                                 "text is captured from stdin")));
+            HelpList()
+                << Help("--filename=FILENAME", tr("Open file"))
+                << Help("--editable", tr("Allow changes to text"))
+                << Help("--font=TEXT", tr("Set the text font"))
+                << Help("--checkbox=TEXT",
+                       tr("Enable an I read and agree checkbox"))
+                << Help("--plain",
+                       tr("Force plain text, zenity default limitation (QARMA "
+                          "ONLY!)"))
+                << Help("--html", tr("Enable HTML support"))
+                << Help("--no-interaction",
+                       tr("Do not enable user interaction with the WebView. "
+                          "Only works if you use --html option"))
+                << Help("--url=URL",
+                       tr("Set an URL instead of a file. Only works if "
+                          "you use --html option (UNSUPPORTED!)"))
+                << Help("--auto-scroll",
+                       tr("Auto scroll the text to the end. Only when "
+                          "text is captured from stdin")));
         helpDict["color-selection"]
             = CategoryHelp(tr("Color selection options"),
                 HelpList() << Help("--color=VALUE", tr("Set the color"))
