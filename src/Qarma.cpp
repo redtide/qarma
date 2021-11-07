@@ -718,7 +718,11 @@ char Qarma::showFileSelection(const QStringList& args)
     QStringList mimeFilters;
     for (int i = 0; i < args.count(); ++i) {
         if (args.at(i) == "--filename") {
-            dlg->selectFile(NEXT_ARG);
+            QString path = NEXT_ARG;
+            if (path.endsWith("/."))
+                dlg->setDirectory(path);
+            else
+                dlg->selectFile(path);
         } else if (args.at(i) == "--multiple") {
             dlg->setFileMode(QFileDialog::ExistingFiles);
         } else if (args.at(i) == "--directory") {
