@@ -1327,7 +1327,7 @@ char Qarma::showText(const QStringList& args)
                     QString::fromLocal8Bit(curl->readAllStandardOutput()));
                 delete curl;
             });
-        curl->start("curl", QStringList() << "-L" << filename);
+        curl->start("curl", QStringList() << "-Ls" << filename);
     } else {
         QFile file(filename);
         if (file.open(QIODevice::ReadOnly)) {
