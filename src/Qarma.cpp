@@ -1035,10 +1035,14 @@ void Qarma::readStdIn()
         const int oldValue = dlg->value();
         bool ok;
         foreach (QString line, input) {
-            static QRegExp nondigit("[^0-9]");
-            int u = line.section(nondigit, 0, 0).toInt(&ok);
-            if (ok)
-                dlg->setValue(qMin(100, u));
+            if (line.startsWith('#')) {
+                dlg->setLabelText(line.mid(1));
+            } else {
+                static QRegExp nondigit("[^0-9]");
+                int u = line.section(nondigit, 0, 0).toInt(&ok);
+                if (ok)
+                    dlg->setValue(qMin(100, u));
+            }
         }
         if (dlg->value() == 100) {
             finishProgress();
