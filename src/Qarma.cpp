@@ -1306,7 +1306,7 @@ char Qarma::showText(const QStringList& args)
     }
     if (te->isReadOnly()) {
         QPalette pal = te->viewport()->palette();
-        for (int i = 0; i < 4; ++i) { // Disabled, Active, Inactive, Normal
+        for (int i = 0; i < 3; ++i) { // Disabled, Active, Inactive, Normal
             QPalette::ColorGroup cg = (QPalette::ColorGroup)i;
             pal.setColor(cg, QPalette::Base, pal.color(cg, QPalette::Window));
             pal.setColor(
