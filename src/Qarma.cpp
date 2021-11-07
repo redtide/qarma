@@ -671,6 +671,8 @@ char Qarma::showMessage(const QStringList& args, char type)
             dlg->setIconPixmap(QIcon(NEXT_ARG).pixmap(64));
         else if (args.at(i) == "--no-wrap")
             wrap = false;
+        else if (args.at(i) == "--ellipsize")
+            wrap = true;
         else if (args.at(i) == "--no-markup")
             html = false;
         else if (args.at(i) == "--default-cancel")
@@ -1510,23 +1512,25 @@ void Qarma::printHelp(const QString& category)
                        << Help("--entry-text=TEXT", tr("Set the entry text"))
                        << Help("--hide-text", tr("Hide the entry text")));
         helpDict["error"] = CategoryHelp(tr("Error options"),
-            HelpList()
-                << Help("--text=TEXT", tr("Set the dialog text"))
-                << Help("--icon-name=ICON-NAME", tr("Set the dialog icon"))
-                << Help("--no-wrap", tr("Do not enable text wrapping"))
-                << Help("--no-markup", tr("Do not enable html markup"))
-                << Help("--selectable-labels",
-                       "QARMA ONLY! "
-                           + tr("Allow to select text for copy and paste")));
+            HelpList() << Help("--text=TEXT", tr("Set the dialog text"))
+                       << Help("--icon-name=ICON-NAME",
+                              tr("Set the dialog icon"))
+                       << Help("--no-wrap", tr("Do not enable text wrapping"))
+                       << Help("--no-markup", tr("Do not enable html markup"))
+                       << Help("--ellipsize", tr("Do wrap text"))
+                       << Help("--selectable-labels",
+                              tr("Allow to select text for copy and paste "
+                                 "(QARMA ONLY!)")));
         helpDict["info"] = CategoryHelp(tr("Info options"),
-            HelpList()
-                << Help("--text=TEXT", tr("Set the dialog text"))
-                << Help("--icon-name=ICON-NAME", tr("Set the dialog icon"))
-                << Help("--no-wrap", tr("Do not enable text wrapping"))
-                << Help("--no-markup", tr("Do not enable html markup"))
-                << Help("--selectable-labels",
-                       "QARMA ONLY! "
-                           + tr("Allow to select text for copy and paste")));
+            HelpList() << Help("--text=TEXT", tr("Set the dialog text"))
+                       << Help("--icon-name=ICON-NAME",
+                              tr("Set the dialog icon"))
+                       << Help("--no-wrap", tr("Do not enable text wrapping"))
+                       << Help("--no-markup", tr("Do not enable html markup"))
+                       << Help("--ellipsize", tr("Do wrap text"))
+                       << Help("--selectable-labels",
+                              tr("Allow to select text for copy and paste "
+                                 "(QARMA ONLY!)")));
         helpDict["file-selection"] = CategoryHelp(tr("File selection options"),
             HelpList()
                 << Help("--filename=FILENAME", tr("Set the filename"))
@@ -1577,25 +1581,26 @@ void Qarma::printHelp(const QString& category)
                        tr("Kill parent process if Cancel button is pressed"))
                 << Help("--no-cancel", tr("Hide Cancel button")));
         helpDict["question"] = CategoryHelp(tr("Question options"),
-            HelpList()
-                << Help("--text=TEXT", tr("Set the dialog text"))
-                << Help("--icon-name=ICON-NAME", tr("Set the dialog icon"))
-                << Help("--no-wrap", tr("Do not enable text wrapping"))
-                << Help("--no-markup", tr("Do not enable html markup"))
-                << Help("--default-cancel",
-                       tr("Give cancel button focus by default"))
-                << Help("--selectable-labels",
-                       "QARMA ONLY! "
-                           + tr("Allow to select text for copy and paste")));
+            HelpList() << Help("--text=TEXT", tr("Set the dialog text"))
+                       << Help("--icon-name=ICON-NAME",
+                              tr("Set the dialog icon"))
+                       << Help("--no-wrap", tr("Do not enable text wrapping"))
+                       << Help("--no-markup", tr("Do not enable html markup"))
+                       << Help("--ellipsize", tr("Do wrap text"))
+                       << Help("--default-cancel",
+                              tr("Give cancel button focus by default"))
+                       << Help("--selectable-labels",
+                              tr("Allow to select text for copy and paste "
+                                 "(QARMA ONLY!)")));
         helpDict["warning"] = CategoryHelp(tr("Warning options"),
-            HelpList()
-                << Help("--text=TEXT", tr("Set the dialog text"))
-                << Help("--icon-name=ICON-NAME", tr("Set the dialog icon"))
-                << Help("--no-wrap", tr("Do not enable text wrapping"))
-                << Help("--no-markup", tr("Do not enable html markup"))
-                << Help("--selectable-labels",
-                       "QARMA ONLY! "
-                           + tr("Allow to select text for copy and paste")));
+            HelpList() << Help("--text=TEXT", tr("Set the dialog text"))
+                       << Help("--icon-name=ICON-NAME",
+                              tr("Set the dialog icon"))
+                       << Help("--no-wrap", tr("Do not enable text wrapping"))
+                       << Help("--no-markup", tr("Do not enable html markup"))
+                       << Help("--selectable-labels",
+                              tr("Allow to select text for copy and paste "
+                                 "(QARMA ONLY!)")));
         helpDict["scale"] = CategoryHelp(tr("Scale options"),
             HelpList() << Help("--text=TEXT", tr("Set the dialog text"))
                        << Help("--value=VALUE", tr("Set initial value"))
@@ -1621,31 +1626,31 @@ void Qarma::printHelp(const QString& category)
             HelpList() << Help(
                 "--username", tr("Display the username option")));
         helpDict["forms"] = CategoryHelp(tr("Forms dialog options"),
-            HelpList() << Help(
-                "--add-entry=Field name", tr("Add a new Entry in forms dialog"))
-                       << Help("--add-password=Field name",
-                              tr("Add a new Password Entry in forms dialog"))
-                       << Help("--add-calendar=Calendar field name",
-                              tr("Add a new Calendar in forms dialog"))
-                       << Help("--add-list=List field and header name",
-                              tr("Add a new List in forms dialog"))
-                       << Help("--list-values=List of values separated by |",
-                              tr("List of values for List"))
-                       << Help("--column-values=List of values separated by |",
-                              tr("List of values for columns"))
-                       << Help("--add-combo=Combo box field name",
-                              tr("Add a new combo box in forms dialog"))
-                       << Help("--combo-values=List of values separated by |",
-                              tr("List of values for combo box"))
-                       << Help("--show-header", tr("Show the columns header"))
-                       << Help("--text=TEXT", tr("Set the dialog text"))
-                       << Help("--separator=SEPARATOR",
-                              tr("Set output separator character"))
-                       << Help("--forms-date-format=PATTERN",
-                              tr("Set the format for the returned date"))
-                       << Help("--add-checkbox=Checkbox label",
-                              "QARMA ONLY! "
-                                  + tr("Add a new Checkbox forms dialog")));
+            HelpList()
+                << Help("--add-entry=Field name",
+                       tr("Add a new Entry in forms dialog"))
+                << Help("--add-password=Field name",
+                       tr("Add a new Password Entry in forms dialog"))
+                << Help("--add-calendar=Calendar field name",
+                       tr("Add a new Calendar in forms dialog"))
+                << Help("--add-list=List field and header name",
+                       tr("Add a new List in forms dialog"))
+                << Help("--list-values=List of values separated by |",
+                       tr("List of values for List"))
+                << Help("--column-values=List of values separated by |",
+                       tr("List of values for columns"))
+                << Help("--add-combo=Combo box field name",
+                       tr("Add a new combo box in forms dialog"))
+                << Help("--combo-values=List of values separated by |",
+                       tr("List of values for combo box"))
+                << Help("--show-header", tr("Show the columns header"))
+                << Help("--text=TEXT", tr("Set the dialog text"))
+                << Help("--separator=SEPARATOR",
+                       tr("Set output separator character"))
+                << Help("--forms-date-format=PATTERN",
+                       tr("Set the format for the returned date"))
+                << Help("--add-checkbox=Checkbox label",
+                       tr("Add a new Checkbox forms dialog (QARMA ONLY!)")));
         helpDict["misc"] = CategoryHelp(tr("Miscellaneous options"),
             HelpList() << Help("--about", tr("About Qarma"))
                        << Help("--version", tr("Print version")));
