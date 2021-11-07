@@ -10,11 +10,13 @@ license=('GPL')
 
 depends=('qt5-base')
 makedepends=('gcc')
+optdepends=("curl: URL retrieval utility and library")
 license=('GPL')
 
 build()
 {
-    qmake-qt5 .. && make || return 1
+    qmake-qt5 ..
+    make
 }
 
 package()

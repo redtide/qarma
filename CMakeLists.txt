@@ -20,9 +20,16 @@ if(UNIX AND NOT APPLE)
     pkg_check_modules(DBUS REQUIRED dbus-1)
 endif()
 
+set(ARCH_SCRIPTS
+    scripts/archlinux/PKGBUILD
+    scripts/archlinux/qarma-zenity/PKGBUILD
+)
+source_group("Arch Scripts" FILES ${ARCH_SCRIPTS})
+
 set(${PRJ_PREFIX}_SOURCES
     src/Qarma.cpp
     src/Qarma.h
+    ${ARCH_SCRIPTS}
 )
 include(QtDefaults)
 
