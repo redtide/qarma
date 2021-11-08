@@ -289,7 +289,7 @@ Qarma::Qarma(int& argc, char** argv)
         // TODO: remove once this is fixed in Qt5
         QWindow* w = new QWindow;
         w->setVisible(true);
-        m_dialog->setWindowTitle(w->title());
+        m_caption = w->title();
         delete w;
 #endif
         // close on ctrl+return in addition to ctrl+enter
@@ -317,8 +317,11 @@ Qarma::Qarma(int& argc, char** argv)
         }
         m_dialog->setWindowModality(
             m_modal ? Qt::ApplicationModal : Qt::NonModal);
-        if (!m_caption.isNull())
-            m_dialog->setWindowTitle(m_caption);
+        if (!m_caption.isNull()) {
+            // What the HACK
+            QTimer::singleShot(
+                10, this, [=]() { m_dialog->setWindowTitle(m_caption); });
+        }
         if (!m_icon.isNull())
             m_dialog->setWindowIcon(QIcon(m_icon));
         QDialogButtonBox* box = m_dialog->findChild<QDialogButtonBox*>();
