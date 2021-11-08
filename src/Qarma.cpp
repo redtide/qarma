@@ -65,6 +65,8 @@
 
 #include <QtDebug>
 
+#include <cfloat>
+
 #ifdef Q_OS_UNIX
 #include <csignal>
 #include <unistd.h>
@@ -409,9 +411,15 @@ void Qarma::dialogFinished(int status)
         break;
     }
     case Entry: {
-        printf("%s\n",
-            qPrintable(static_cast<QInputDialog*>(sender())->textValue()));
-        break;
+        QInputDialog* dlg = static_cast<QInputDialog*>(sender());
+        if (dlg->inputMode() == QInputDialog::DoubleInput) {
+            printf("%s\n",
+                qPrintable(QLocale::c().toString(dlg->doubleValue(), 'f', 2)));
+        } else if (dlg->inputMode() == QInputDialog::IntInput) {
+            printf("%d\n", dlg->intValue());
+        } else {
+            printf("%s\n", qPrintable(dlg->textValue()));
+        }
     }
     case Password: {
         QLineEdit *username = sender()->findChild<QLineEdit*>("qarma_username"),
@@ -610,14 +618,26 @@ char Qarma::showEntry(const QStringList& args)
 {
     QInputDialog* dlg = new QInputDialog;
     for (int i = 0; i < args.count(); ++i) {
-        if (args.at(i) == "--text")
+        if (args.at(i) == "--text") {
             dlg->setLabelText(labelText(NEXT_ARG));
-        else if (args.at(i) == "--entry-text")
+        } else if (args.at(i) == "--entry-text") {
             dlg->setTextValue(NEXT_ARG);
-        else if (args.at(i) == "--hide-text")
+        } else if (args.at(i) == "--hide-text") {
             dlg->setTextEchoMode(QLineEdit::Password);
-        else
+        } else if (args.at(i) == "--values") {
+            dlg->setComboBoxItems(NEXT_ARG.split('|'));
+            dlg->setComboBoxEditable(true);
+        } else if (args.at(i) == "--int") {
+            dlg->setInputMode(QInputDialog::IntInput);
+            dlg->setIntRange(INT_MIN, INT_MAX);
+            dlg->setIntValue(NEXT_ARG.toInt());
+        } else if (args.at(i) == "--float") {
+            dlg->setInputMode(QInputDialog::DoubleInput);
+            dlg->setDoubleRange(DBL_MIN, DBL_MAX);
+            dlg->setDoubleValue(NEXT_ARG.toDouble());
+        } else {
             WARN_UNKNOWN_ARG("--entry");
+        }
     }
     SHOW_DIALOG
 
@@ -1569,9 +1589,19 @@ void Qarma::printHelp(const QString& category)
                        << Help("--date-format=PATTERN",
                               tr("Set the format for the returned date")));
         helpDict["entry"] = CategoryHelp(tr("Text entry options"),
-            HelpList() << Help("--text=TEXT", tr("Set the dialog text"))
-                       << Help("--entry-text=TEXT", tr("Set the entry text"))
-                       << Help("--hide-text", tr("Hide the entry text")));
+            HelpList()
+                << Help("--text=TEXT", tr("Set the dialog text"))
+                << Help("--entry-text=TEXT", tr("Set the entry text"))
+                << Help("--hide-text", tr("Hide the entry text"))
+                << Help("--values=v1|v2|v3|...",
+                       tr("Offer preset values to pick from (QARMA ONLY!)"))
+                << Help("--int=integer",
+                       tr("Integer input only, preset given value (QARMA "
+                          "ONLY!)"))
+                << Help("--float=floating_point",
+                       tr("Floating point input only, preset given (QARMA "
+                          "ONLY!)"
+                          "value")));
         helpDict["error"] = CategoryHelp(tr("Error options"),
             HelpList() << Help("--text=TEXT", tr("Set the dialog text"))
                        << Help("--icon-name=ICON-NAME",
