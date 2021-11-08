@@ -1385,6 +1385,44 @@ char Qarma::showColorSelection(const QStringList& args)
             qWarning(
                 "The show-palette parameter is not supported by qarma. Sorry.");
             void(0);
+        } else if (args.at(i) == "--custom-palette") {
+            if (i + 1 < args.count()) {
+                QString path = NEXT_ARG;
+                QFile file(path);
+                if (file.open(QIODevice::ReadOnly)) {
+                    QStringList pal
+                        = QString::fromLocal8Bit(file.readAll()).split('\n');
+                    int r, g, b;
+                    bool ok;
+                    int idx = 0;
+                    for (const QString& line : pal) {
+                        if (idx > 47)
+                            break; // sorry :(
+                        QStringList color = line.split(
+                            QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+                        if (color.count() < 3)
+                            continue;
+                        r = color.at(0).toInt(&ok);
+                        if (!ok)
+                            continue;
+                        g = color.at(1).toInt(&ok);
+                        if (!ok)
+                            continue;
+                        b = color.at(2).toInt(&ok);
+                        if (!ok)
+                            continue;
+                        dlg->setStandardColor(idx++, QColor(r, g, b));
+                    }
+                    while (idx < 48) {
+                        dlg->setStandardColor(idx++, Qt::black);
+                    }
+                    file.close();
+                } else {
+                    qWarning("Cannot read %s", path.toLocal8Bit().constData());
+                }
+            } else {
+                qWarning("You have to provide a gimp palette (*.gpl)");
+            }
         } else {
             WARN_UNKNOWN_ARG("--color-selection");
         }
@@ -1723,7 +1761,10 @@ void Qarma::printHelp(const QString& category)
         helpDict["color-selection"]
             = CategoryHelp(tr("Color selection options"),
                 HelpList() << Help("--color=VALUE", tr("Set the color"))
-                           << Help("--show-palette", tr("Show the palette")));
+                           << Help("--show-palette", tr("Show the palette"))
+                           << Help("--custom-palette=path/to/some.gpl",
+                                  tr("Load a custom GPL for standard colors "
+                                     "(QARMA ONLY!)")));
         helpDict["password"] = CategoryHelp(tr("Password dialog options"),
             HelpList() << Help(
                 "--username", tr("Display the username option")));
