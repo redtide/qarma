@@ -1062,7 +1062,7 @@ void Qarma::readStdIn()
 
         foreach (QString line, input) {
             if (line.startsWith('#')) {
-                dlg->setLabelText(line.mid(1));
+                dlg->setLabelText(labelText(line.mid(1)));
             } else {
                 static QRegExp nondigit("[^0-9]");
                 int u = line.section(nondigit, 0, 0).toInt(&ok);
