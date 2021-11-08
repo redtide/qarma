@@ -34,6 +34,7 @@
 #include <QDialogButtonBox>
 #include <QEvent>
 #include <QFileDialog>
+#include <QFontDialog>
 #include <QFormLayout>
 #include <QIcon>
 #include <QInputDialog>
@@ -438,6 +439,35 @@ void Qarma::dialogFinished(int status)
         printf("%s\n",
             qPrintable(
                 files.join(sender()->property("qarma_separator").toString())));
+        break;
+    }
+    case FontSelection: {
+        QFontDialog* dlg = static_cast<QFontDialog*>(sender());
+        QFont fnt = dlg->selectedFont();
+        int size = fnt.pointSize();
+        if (size < 0)
+            size = fnt.pixelSize();
+
+        // crude mapping of Qt's random enum to xft's random category
+        QString weight = "medium";
+        if (fnt.weight() < 35)
+            weight = "light";
+        else if (fnt.weight() > 85)
+            weight = "black";
+        else if (fnt.weight() > 70)
+            weight = "bold";
+        else if (fnt.weight() > 60)
+            weight = "demibold";
+
+        QString slant = "roman";
+        if (fnt.style() == QFont::StyleItalic)
+            slant = "italic";
+        else if (fnt.style() == QFont::StyleOblique)
+            slant = "oblique";
+
+        QString font = sender()->property("qarma_fontpattern").toString();
+        font = font.arg(fnt.family()).arg(size).arg(weight).arg(slant);
+        printf("%s\n", qPrintable(font));
         break;
     }
     case ColorSelection: {
@@ -1431,6 +1461,41 @@ char Qarma::showColorSelection(const QStringList& args)
     return 0;
 }
 
+char Qarma::showFontSelection(const QStringList& args)
+{
+    QFontDialog* dlg = new QFontDialog;
+    QString pattern = "%1-%2:%3:%4";
+    for (int i = 0; i < args.count(); ++i) {
+        if (args.at(i) == "--type") {
+            QStringList types = NEXT_ARG.split(',');
+            QFontDialog::FontDialogOptions opts;
+            for (const QString& type : types) {
+                if (type == "vector")
+                    opts |= QFontDialog::ScalableFonts;
+                if (type == "bitmap")
+                    opts |= QFontDialog::NonScalableFonts;
+                if (type == "fixed")
+                    opts |= QFontDialog::MonospacedFonts;
+                if (type == "variable")
+                    opts |= QFontDialog::ProportionalFonts;
+            }
+            if (opts) // https://bugreports.qt.io/browse/QTBUG-93473
+                dlg->setOptions(opts);
+            dlg->setCurrentFont(QFont()); // also works around the bug :P
+        } else if (args.at(i) == "--pattern") {
+            pattern = NEXT_ARG;
+            if (!pattern.contains("%1"))
+                qWarning("The output pattern doesn't include a placeholder for "
+                         "the font name...");
+        } else {
+            WARN_UNKNOWN_ARG("--font-selection");
+        }
+    }
+    dlg->setProperty("qarma_fontpattern", pattern);
+    SHOW_DIALOG
+    return 0;
+}
+
 static void buildList(QTreeWidget** tree, QStringList& values,
     QStringList& columns, bool& showHeader)
 {
@@ -1765,6 +1830,12 @@ void Qarma::printHelp(const QString& category)
                            << Help("--custom-palette=path/to/some.gpl",
                                   tr("Load a custom GPL for standard colors "
                                      "(QARMA ONLY!)")));
+        helpDict["font-selection"] = CategoryHelp(tr("Font selection options"),
+            HelpList() << Help("--type=[vector][,bitmap][,fixed][,variable]",
+                tr("Filter fonts (default: all)"))
+                       << Help("--pattern=%1-%2:%3:%4",
+                              tr("Output pattern, %1: Name, %2: Size, %3: "
+                                 "weight, %4: slant")));
         helpDict["password"] = CategoryHelp(tr("Password dialog options"),
             HelpList() << Help(
                 "--username", tr("Display the username option")));

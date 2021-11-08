@@ -45,6 +45,7 @@ public:
         Scale,
         TextInfo,
         ColorSelection,
+        FontSelection,
         Password,
         Forms
     };
@@ -62,6 +63,7 @@ private:
     char showScale(const QStringList& args);
     char showText(const QStringList& args);
     char showColorSelection(const QStringList& args);
+    char showFontSelection(const QStringList& args);
     char showForms(const QStringList& args);
     bool readGeneral(QStringList& args);
     bool error(const QString& message);
