@@ -73,6 +73,12 @@
 #include <unistd.h>
 #endif
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
+#define SKIP_EMPTY Qt::SkipEmptyParts
+#else
+#define SKIP_EMPTY QString::SkipEmptyParts
+#endif
+
 static QScreen* findScreenAt(const QPoint& pos)
 {
     foreach (QScreen* screen, QGuiApplication::screens()) {
@@ -1440,7 +1446,7 @@ char Qarma::showColorSelection(const QStringList& args)
                         if (idx > 47)
                             break; // sorry :(
                         QStringList color = line.split(
-                            QRegularExpression("\\s+"), Qt::SkipEmptyParts);
+                            QRegularExpression("\\s+"), SKIP_EMPTY);
                         if (color.count() < 3)
                             continue;
                         r = color.at(0).toInt(&ok);
