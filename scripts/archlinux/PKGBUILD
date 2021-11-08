@@ -3,7 +3,7 @@
 pkgname=qarma
 pkgver=0.1.0
 pkgrel=1
-pkgdesc="A drop-in replacement clone for zenity, written in Qt4/5"
+pkgdesc="A drop-in replacement clone for zenity, written in Qt5/6"
 arch=('i686' 'x86_64')
 url="https://github.com/luebking/qarma"
 license=('GPL')
@@ -18,12 +18,9 @@ build()
     qmake-qt5 ..
     make
 }
-
 package()
 {
-    mkdir -p $pkgdir/usr/bin
-    install qarma $pkgdir/usr/bin
-    strip $pkgdir/usr/bin/qarma
+    install -Dm755 qarma -t "$pkgdir/usr/bin"
     ln -s /usr/bin/qarma $pkgdir/usr/bin/qarma-askpass
 }
 
